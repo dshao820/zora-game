@@ -34,7 +34,8 @@ class AudioEngine {
   private nextTime = 0;
   private step = 0;
   private lastPlayed = new Map<string, number>();
-  private clip: HTMLAudioElement | null = null;
+  private clip: { src: AudioBufferSourceNode; finish: (ok: boolean) => void } | null = null;
+  private clipBuffers = new Map<string, Promise<AudioBuffer | null>>();
 
   /** 必須在使用者互動事件中呼叫一次（瀏覽器自動播放政策） */
   unlock() {
@@ -92,7 +93,7 @@ class AudioEngine {
     const tc = instant ? 0.001 : 0.12;
     master.gain.setTargetAtTime(this.muted ? 0 : 1, t, tc);
     sfxBus.gain.setTargetAtTime(this.sfxOn ? 0.9 : 0, t, tc);
-    musicBus.gain.setTargetAtTime(this.musicOn ? (this.ducked ? 0.15 : 0.55) : 0, t, tc);
+    musicBus.gain.setTargetAtTime(this.musicOn ? (this.ducked || this.clip ? 0.15 : 0.55) : 0, t, tc);
   }
 
   // ---------- 背景音樂 ----------
@@ -216,22 +217,71 @@ class AudioEngine {
     }
   }
 
-  /** 播放真實音檔（選用），失敗時回傳 false 讓呼叫端改用語音 */
-  playClip(url: string): Promise<boolean> {
-    if (this.muted || !this.sfxOn) return Promise.resolve(false);
+  /** 先下載並解碼音檔，第一次播放就不會延遲（需先 unlock） */
+  preload(urls: readonly string[]) {
+    for (const url of urls) void this.loadClip(url);
+  }
+
+  private loadClip(url: string): Promise<AudioBuffer | null> {
+    const ctx = this.ctx;
+    if (!ctx) return Promise.resolve(null);
+    let p = this.clipBuffers.get(url);
+    if (!p) {
+      p = fetch(url)
+        .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(r.statusText))))
+        .then((data) => ctx.decodeAudioData(data))
+        .catch(() => {
+          this.clipBuffers.delete(url); // 網路恢復後可再試
+          return null;
+        });
+      this.clipBuffers.set(url, p);
+    }
+    return p;
+  }
+
+  /**
+   * 播放真實音檔（動物叫聲）。走 Web Audio 而不是 <audio>，
+   * iOS 上不需要每次都由點擊觸發；播放時背景音樂自動降低。
+   * 失敗時回傳 false 讓呼叫端改用語音。
+   */
+  async playClip(url: string): Promise<boolean> {
+    if (this.muted || !this.sfxOn) return false;
     this.stopClip();
-    const el = new Audio(url);
-    this.clip = el;
+    const buffer = await this.loadClip(url);
+    const { ctx, sfxBus } = this;
+    if (!buffer || !ctx || !sfxBus || this.muted || !this.sfxOn) return false;
+    this.stopClip();
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(sfxBus);
     return new Promise((resolve) => {
-      el.onended = () => resolve(true);
-      el.onerror = () => resolve(false);
-      el.play().catch(() => resolve(false));
+      const clip = {
+        src,
+        finish: (ok: boolean) => {
+          if (this.clip === clip) {
+            this.clip = null;
+            this.applyGains();
+          }
+          resolve(ok);
+        },
+      };
+      src.onended = () => clip.finish(true);
+      this.clip = clip;
+      this.applyGains();
+      src.start();
     });
   }
 
   private stopClip() {
-    this.clip?.pause();
-    this.clip = null;
+    const c = this.clip;
+    if (!c) return;
+    c.src.onended = null;
+    try {
+      c.src.stop();
+    } catch {
+      // 尚未開始播放
+    }
+    c.finish(true);
   }
 }
 

@@ -418,6 +418,176 @@ const ART: Record<Species, { base: string; draw: (p: ArtProps) => ReactNode }> =
       </>
     ),
   },
+  frog: {
+    base: '#7ed36b',
+    draw: ({ c, shirt }) => (
+      <>
+        <Body c={c} cy={156} rx={52} ry={34} />
+        {shirt ? <Shirt color={shirt} /> : <ellipse cx={100} cy={160} rx={32} ry={22} fill="#dff5cf" />}
+        <Feet c={c} />
+        <Shape>
+          <circle cx={66} cy={64} r={23} fill={c} />
+          <circle cx={134} cy={64} r={23} fill={c} />
+        </Shape>
+        <ellipse cx={100} cy={100} rx={64} ry={44} fill={c} stroke={INK} strokeWidth={SW} />
+        <circle cx={66} cy={64} r={20.5} fill={c} />
+        <circle cx={134} cy={64} r={20.5} fill={c} />
+        <circle cx={66} cy={64} r={14} fill="#fff" />
+        <circle cx={134} cy={64} r={14} fill="#fff" />
+        <Eyes y={64} dx={34} />
+        <circle cx={92} cy={96} r={2.5} fill={INK} />
+        <circle cx={108} cy={96} r={2.5} fill={INK} />
+        <Line d="M68 110 Q100 134 132 110" />
+        <Cheeks y={112} dx={48} />
+      </>
+    ),
+  },
+  horse: {
+    base: '#c98b5a',
+    draw: ({ c, shirt }) => (
+      <>
+        <Tail d="M146 150 Q178 150 170 182" c="#6b4a3a" origin="146px 150px" w={12} />
+        <Body c={c} />
+        {shirt && <Shirt color={shirt} />}
+        <Feet c="#5c4a4f" />
+        <Shape>
+          <path d="M60 58 L62 18 L88 40 Z" fill={c} />
+          <path d="M140 58 L138 18 L112 40 Z" fill={c} />
+        </Shape>
+        <path d="M66 46 L67 28 L80 40 Z" fill="#f0c9a6" />
+        <path d="M134 46 L133 28 L120 40 Z" fill="#f0c9a6" />
+        <ellipse cx={100} cy={90} rx={50} ry={56} fill={c} stroke={INK} strokeWidth={SW} />
+        <Shape>
+          <path d="M74 50 Q84 26 100 38 Q112 22 128 46 Q114 44 104 56 Q96 44 74 50 Z" fill="#6b4a3a" />
+        </Shape>
+        <ellipse cx={100} cy={124} rx={34} ry={22} fill="#f0d2b0" stroke={INK} strokeWidth={SW} />
+        <ellipse cx={88} cy={122} rx={4} ry={5.5} fill={INK} />
+        <ellipse cx={112} cy={122} rx={4} ry={5.5} fill={INK} />
+        <Line d="M92 134 Q100 139 108 134" w={3} />
+        <Eyes y={84} dx={22} />
+        <Cheeks y={104} dx={40} />
+      </>
+    ),
+  },
+  squirrel: {
+    base: '#d98a4e',
+    draw: ({ c, shirt }) => (
+      <>
+        <Tail d="M136 166 Q178 156 166 100 Q158 68 134 76" c={c} origin="136px 166px" w={26} />
+        <Line d="M146 148 Q166 128 158 102" w={4} color="#f6d3aa" />
+        <Body c={c} cy={154} rx={46} ry={36} />
+        {shirt ? (
+          <Shirt color={shirt} />
+        ) : (
+          <>
+            <ellipse cx={100} cy={160} rx={28} ry={24} fill="#f6d3aa" />
+            <ellipse cx={100} cy={150} rx={13} ry={11} fill="#a0663a" stroke={INK} strokeWidth={3} />
+            <path d="M85 144 Q100 128 115 144 Z" fill="#6b4a3a" stroke={INK} strokeWidth={3} strokeLinejoin="round" />
+            <Shape>
+              <ellipse cx={80} cy={152} rx={9} ry={11} fill={c} />
+              <ellipse cx={120} cy={152} rx={9} ry={11} fill={c} />
+            </Shape>
+          </>
+        )}
+        <Feet c={c} />
+        <Shape>
+          <path d="M58 70 L62 26 L90 50 Z" fill={c} />
+          <path d="M142 70 L138 26 L110 50 Z" fill={c} />
+        </Shape>
+        <Line d="M62 26 L58 16 M62 26 L66 15 M138 26 L142 16 M138 26 L134 15" w={3} />
+        <Head c={c} r={50} cy={92} />
+        <ellipse cx={100} cy={112} rx={28} ry={20} fill="#f6d3aa" />
+        <Eyes y={88} dx={20} />
+        <ellipse cx={100} cy={104} rx={6} ry={4.5} fill={INK} />
+        <Line d="M100 108 L100 112 M92 112 Q96 117 100 112 Q104 117 108 112" w={3} />
+        <rect x={95.5} y={114} width={9} height={8} rx={2} fill="#fff" stroke={INK} strokeWidth={2.5} />
+        <Cheeks y={110} dx={34} />
+      </>
+    ),
+  },
+  giraffe: {
+    base: '#ffd26a',
+    draw: ({ c, shirt }) => (
+      <>
+        <Tail d="M142 160 Q164 166 160 184" c={c} origin="142px 160px" w={4} />
+        <Body c={c} cy={160} rx={48} ry={32} />
+        <path d="M80 140 L82 74 H118 L120 140 Z" fill={c} stroke={INK} strokeWidth={SW} strokeLinejoin="round" />
+        <ellipse cx={100} cy={136} rx={22} ry={10} fill={c} />
+        <g fill="#d9893a">
+          <ellipse cx={92} cy={96} rx={7} ry={6} />
+          <ellipse cx={108} cy={114} rx={7} ry={6} />
+          <ellipse cx={94} cy={128} rx={6} ry={5} />
+          <ellipse cx={72} cy={160} rx={9} ry={7} />
+          <ellipse cx={128} cy={156} rx={9} ry={7} />
+          <ellipse cx={104} cy={172} rx={8} ry={6} />
+        </g>
+        {shirt && <Shirt color={shirt} />}
+        <Feet c="#8a5a44" />
+        <Line d="M86 34 L84 14 M114 34 L116 14" w={6} />
+        <circle cx={84} cy={13} r={7} fill="#a0663a" stroke={INK} strokeWidth={3} />
+        <circle cx={116} cy={13} r={7} fill="#a0663a" stroke={INK} strokeWidth={3} />
+        <Shape>
+          <ellipse cx={56} cy={52} rx={16} ry={8} fill={c} transform="rotate(-20 56 52)" />
+          <ellipse cx={144} cy={52} rx={16} ry={8} fill={c} transform="rotate(20 144 52)" />
+        </Shape>
+        <ellipse cx={100} cy={60} rx={40} ry={36} fill={c} stroke={INK} strokeWidth={SW} />
+        <ellipse cx={100} cy={80} rx={28} ry={16} fill="#ffe9b0" stroke={INK} strokeWidth={3} />
+        <circle cx={92} cy={78} r={2.5} fill={INK} />
+        <circle cx={108} cy={78} r={2.5} fill={INK} />
+        <Line d="M94 88 Q100 92 106 88" w={3} />
+        <Eyes y={54} dx={18} />
+        <Cheeks y={72} dx={34} />
+      </>
+    ),
+  },
+  penguin: {
+    base: '#3f4a5c',
+    draw: ({ c, shirt }) => (
+      <>
+        <Shape>
+          <ellipse cx={44} cy={136} rx={13} ry={30} fill={c} transform="rotate(22 44 136)" />
+          <ellipse cx={156} cy={136} rx={13} ry={30} fill={c} transform="rotate(-22 156 136)" />
+        </Shape>
+        <ellipse cx={100} cy={124} rx={60} ry={66} fill={c} stroke={INK} strokeWidth={SW} />
+        <ellipse cx={100} cy={146} rx={42} ry={42} fill="#fff" />
+        <circle cx={82} cy={92} r={23} fill="#fff" />
+        <circle cx={118} cy={92} r={23} fill="#fff" />
+        <ellipse cx={100} cy={112} rx={34} ry={22} fill="#fff" />
+        {shirt && <Shirt color={shirt} />}
+        <Feet c="#ff9f1c" y={188} />
+        <Eyes y={92} dx={18} />
+        <path d="M88 106 L112 106 L100 120 Z" fill="#ff9f1c" stroke={INK} strokeWidth={3} strokeLinejoin="round" />
+        <Cheeks y={112} dx={34} />
+      </>
+    ),
+  },
+  turtle: {
+    base: '#b9e08a',
+    draw: ({ c, shirt }) => (
+      <>
+        <Shape>
+          <ellipse cx={38} cy={162} rx={20} ry={12} fill={c} transform="rotate(-20 38 162)" />
+          <ellipse cx={162} cy={162} rx={20} ry={12} fill={c} transform="rotate(20 162 162)" />
+        </Shape>
+        <Feet c={c} y={186} />
+        <path d="M30 168 Q30 104 100 104 Q170 104 170 168 Z" fill="#5fae5c" stroke={INK} strokeWidth={SW} strokeLinejoin="round" />
+        <rect x={26} y={160} width={148} height={16} rx={8} fill="#f5c26b" stroke={INK} strokeWidth={SW} />
+        {shirt ? (
+          <Shirt color={shirt} />
+        ) : (
+          <g fill="#7fc66b" stroke={INK} strokeWidth={3} strokeLinejoin="round">
+            <path d="M84 124 L116 124 L124 142 L116 158 L84 158 L76 142 Z" />
+            <path d="M50 150 L64 128 L72 142 L66 158 Z" />
+            <path d="M150 150 L136 128 L128 142 L134 158 Z" />
+          </g>
+        )}
+        <Head c={c} r={44} cy={78} />
+        <Eyes y={72} dx={18} />
+        <Line d="M88 94 Q100 104 112 94" />
+        <Cheeks y={90} dx={30} />
+      </>
+    ),
+  },
   bird: {
     base: '#4d96ff',
     draw: ({ c }) => (

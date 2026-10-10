@@ -28,7 +28,7 @@ npm run preview    # 預覽 build 結果
 
 技術：React + TypeScript + Vite、Tailwind CSS、Motion（Framer Motion）、Web Speech API、Web Audio API。
 
-所有角色與圖示都是程式內的 SVG，不使用 Emoji；音效與背景音樂由 Web Audio 即時合成，不需要音檔。
+所有角色與圖示都是程式內的 SVG，不使用 Emoji；音效與背景音樂由 Web Audio 即時合成；只有動物叫聲使用真實錄音。
 
 ## 專案結構
 
@@ -44,7 +44,7 @@ src/
 
 - 新增模式：在 `src/games/<遊戲>/` 新增元件並匯出 `MODE_ID`，再到 `src/games/registry.tsx` 加一筆
 - 新增動物：在 `src/data/animals.ts` 加資料，並在 `src/components/AnimalArt.tsx` 畫出造型
-- 想用真實動物叫聲：把音檔放進 `public/sounds/`，在 `animals.ts` 該動物加上 `soundUrl: 'sounds/dog.mp3'`，播放失敗時會自動改用語音
+- 動物叫聲是真實錄音，放在 `public/sounds/`（來源與授權見 `public/sounds/CREDITS.md`）；在 `animals.ts` 用 `soundUrl` 指定，沒有或播放失敗時改用語音念出狀聲詞
 
 ## 語音
 

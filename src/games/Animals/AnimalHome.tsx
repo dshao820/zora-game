@@ -3,13 +3,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimalCharacter } from '../../components/AnimalCharacter';
 import { CARD_BTN, GameButton } from '../../components/GameButton';
 import { HabitatArt } from '../../components/HabitatArt';
-import { HABITATS, type HabitatId } from '../../data/animals';
+import { HABITATS, type AnimalInfo, type HabitatId } from '../../data/animals';
 import { useFeedback, useShake } from '../../hooks/useFeedback';
 import { useLevel } from '../../hooks/useLevel';
 import { useReplay } from '../../hooks/useReplay';
 import { useRound } from '../../hooks/useRound';
 import { audio } from '../../lib/audio';
-import { pick, sample, shuffle } from '../../lib/random';
+import { createDeck, sample, shuffle } from '../../lib/random';
 import { u } from '../../lib/ui';
 
 export const MODE_ID = 'animals-home';
@@ -23,9 +23,10 @@ export default function AnimalHome() {
   const shaker = useShake();
   const animalRef = useRef<HTMLDivElement>(null);
   const [move, setMove] = useState<{ x: number; y: number; habitat: HabitatId } | null>(null);
+  const [draw] = useState(createDeck<AnimalInfo>);
 
   const q = useMemo(() => {
-    const animal = pick(animals);
+    const animal = draw(animals);
     const options = shuffle([animal.habitat, ...sample(ALL_HABITATS.filter((h) => h !== animal.habitat), 2)]);
     return { animal, options };
   }, [round, animals]);

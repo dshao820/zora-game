@@ -83,6 +83,19 @@ const ART: Record<HabitatId, ReactNode> = {
       ))}
     </>
   ),
+  ice: (
+    <>
+      <path d="M0 98 Q40 90 80 96 T160 94 V120 H0 Z" fill="#e8f4fd" {...S} />
+      <path d="M14 98 L36 52 L52 64 L72 30 L96 70 L108 60 L130 98 Z" fill="#bfe3fb" {...S} />
+      <path d="M72 30 L66 58 M36 52 L34 72" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" />
+      <path d="M112 98 a22 20 0 0 1 44 0 Z" fill="#fff" {...S} />
+      <path d="M126 98 v-9 a8 8 0 0 1 16 0 v9" fill="#9fc8e6" {...S} strokeWidth={2.5} />
+      <path d="M116 88 H152 M120 80 H148" fill="none" stroke="#9fc8e6" strokeWidth="2" />
+      {[[22, 22], [54, 14], [104, 20], [140, 34], [120, 10]].map(([x, y]) => (
+        <circle key={`${x}-${y}`} cx={x} cy={y} r="3.5" fill="#9fd3f5" />
+      ))}
+    </>
+  ),
   bed: (
     <>
       <rect x="0" y="100" width="160" height="20" fill="#f3e0c8" />

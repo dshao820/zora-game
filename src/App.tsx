@@ -1,3 +1,4 @@
+import { preloadAnimalSounds } from './hooks/useAudio';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { useState } from 'react';
 import { Caption } from './components/Caption';
@@ -27,6 +28,7 @@ export default function App() {
     // 第一次使用者互動：解鎖音訊與語音
     audio.unlock();
     speech.unlock();
+    preloadAnimalSounds();
     setScreen('home');
   };
 
