@@ -1,209 +1,29 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="小小探險家">
-<title>小小探險家</title>
-<style>
-  html,body{margin:0;height:100%;overscroll-behavior:none}
-  body{font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;background:linear-gradient(#e0f2fe,#fef9c3);color:#334155;
-       user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden}
-  #g{position:relative;height:100%;padding:20px;box-sizing:border-box;overflow:hidden}
-  button{font-family:inherit;border:none;cursor:pointer;touch-action:manipulation}
-  .top{display:flex;justify-content:space-between;align-items:center}
-  .ib{width:72px;height:72px;border-radius:50%;background:#fff;font-size:36px;box-shadow:0 5px 0 #cbd5e1}
-  #stars{flex:1;text-align:center;font-size:32px;min-height:44px}
-  .title{font-size:52px;font-weight:800;text-align:center;margin:40px 0}
-  .menu{display:flex;flex-wrap:wrap;gap:32px;justify-content:center}
-  .mbtn{width:220px;height:220px;border-radius:40px;font-size:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 0 rgba(0,0,0,.15)}
-  .mbtn span{font-size:40px;font-weight:800;color:#334155;margin-top:8px}
-  .q{font-size:48px;font-weight:800;text-align:center;margin:30px 0 40px}
-  .opts{display:flex;flex-wrap:wrap;gap:36px;justify-content:center;align-items:flex-end}
-  .bal{width:160px;height:195px;border-radius:50% 50% 46% 46%;position:relative;margin-bottom:60px;
-       background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.7) 0 12%,transparent 13%),var(--c);box-shadow:inset -12px -16px 0 rgba(0,0,0,.12)}
-  .bal::after{content:"";position:absolute;left:50%;top:100%;width:3px;height:60px;background:#64748b}
-  .card{width:200px;height:200px;border-radius:36px;background:#fff;font-size:120px;line-height:1;box-shadow:0 10px 0 #cbd5e1}
-  .row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:40px}
-  .cnt{font-size:96px;display:inline-block;transition:transform .2s}
-  .cnt.on{transform:scale(1.4)}
-  .num{width:170px;height:170px;border-radius:36px;background:#fff;box-shadow:0 10px 0 #cbd5e1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#334155}
-  .num b{font-size:84px;line-height:1}
-  .num i{font-style:normal;font-size:26px;color:#f97316;letter-spacing:3px;margin-top:8px}
-  .shake{animation:sh .5s}
-  @keyframes sh{0%,100%{transform:translateX(0)}25%{transform:translateX(-14px)}75%{transform:translateX(14px)}}
-  .pop{animation:pp .8s}
-  @keyframes pp{0%{transform:scale(1)}40%{transform:scale(1.25) rotate(-6deg)}70%{transform:scale(1.15) rotate(6deg)}100%{transform:scale(1)}}
-  .cf{position:absolute;top:-70px;font-size:52px;pointer-events:none;animation:fall 1.8s linear forwards}
-  @keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
-</style>
-</head>
-<body>
-<div id="g">
-  <div class="top">
-    <button class="ib" id="home" aria-label="回選單">🏠</button>
-    <div id="stars"></div>
-    <button class="ib" id="spk" aria-label="再聽一次">🔊</button>
-  </div>
-  <div id="stage"></div>
-</div>
-<script>
-(() => {
-  const COLORS = [
-    {n:'紅色',c:'#ef4444'},{n:'黃色',c:'#facc15'},{n:'藍色',c:'#3b82f6'},
-    {n:'綠色',c:'#22c55e'},{n:'橘色',c:'#f97316'},{n:'紫色',c:'#a855f7'}
-  ];
-  const ANIMALS = [
-    {n:'小狗',e:'🐶',s:'汪汪汪'},{n:'小貓',e:'🐱',s:'喵喵喵'},{n:'小牛',e:'🐮',s:'哞～'},
-    {n:'小豬',e:'🐷',s:'嚕嚕嚕'},{n:'小雞',e:'🐤',s:'啾啾啾'},{n:'小羊',e:'🐑',s:'咩～'},
-    {n:'小鴨',e:'🦆',s:'呱呱呱'},{n:'獅子',e:'🦁',s:'吼～'}
-  ];
-  const ZH  = ['','一','二','三','四','五'];
-  const QTY = ['','一','兩','三','四','五'];
-
-  const g = document.getElementById('g');
-  const stage = document.getElementById('stage');
-  const starsEl = document.getElementById('stars');
-  let mode = null, busy = false, stars = 0, prompt = '', token = 0;
-
-  let voice = null;
-  function loadVoice(){
-    const vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
-    voice = vs.find(v => v.lang === 'zh-TW') || vs.find(v => v.lang && v.lang.startsWith('zh')) || null;
-  }
-  if (window.speechSynthesis){ speechSynthesis.onvoiceschanged = loadVoice; loadVoice(); }
-  function say(t){
-    if (!window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(t);
-    u.lang = 'zh-TW'; if (voice) u.voice = voice;
-    u.rate = 0.85; u.pitch = 1.2;
-    speechSynthesis.speak(u);
-  }
-
-  const rnd = n => Math.floor(Math.random()*n);
-  function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=rnd(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-
-  function drawStars(){ starsEl.textContent = stars <= 8 ? '⭐'.repeat(stars) : '⭐ × ' + stars; }
-
-  function confetti(){
-    const items = ['⭐','🎉','✨','🎈'];
-    for (let i=0;i<16;i++){
-      const s = document.createElement('span');
-      s.className = 'cf';
-      s.textContent = items[rnd(items.length)];
-      s.style.left = Math.random()*95 + '%';
-      s.style.animationDelay = Math.random()*0.4 + 's';
-      g.appendChild(s);
-      setTimeout(() => s.remove(), 2400);
-    }
-  }
-
-  function win(el, msg){
-    busy = true;
-    el.classList.add('pop');
-    stars++; drawStars(); confetti(); say(msg);
-    const tk = token;
-    setTimeout(() => { if (tk === token) next(); }, 2800);
-  }
-  function miss(el, msg){
-    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
-    say(msg);
-  }
-
-  function menu(){
-    token++; mode = null; busy = false;
-    prompt = '你想玩什麼呢？顏色、數量，還是動物？';
-    stage.innerHTML = `
-      <div class="title">一起來玩！</div>
-      <div class="menu">
-        <button class="mbtn" data-m="color"  style="background:#fde68a">🎨<span>顏色</span></button>
-        <button class="mbtn" data-m="count"  style="background:#bbf7d0">🔢<span>數量</span></button>
-        <button class="mbtn" data-m="animal" style="background:#bfdbfe">🐾<span>動物</span></button>
-      </div>`;
-    stage.querySelectorAll('.mbtn').forEach(b => b.onclick = () => { mode = b.dataset.m; next(); });
-  }
-
-  function next(){
-    token++; busy = false;
-    if (mode === 'color') colorRound();
-    else if (mode === 'count') countRound();
-    else if (mode === 'animal') animalRound();
-    say(prompt);
-  }
-
-  function colorRound(){
-    const opts = shuffle(COLORS).slice(0,3), t = opts[rnd(3)];
-    prompt = `哪一個是${t.n}？`;
-    stage.innerHTML = `<div class="q">哪一個是${t.n}？</div>
-      <div class="opts">${opts.map((o,i)=>`<button class="bal" data-i="${i}" style="--c:${o.c}" aria-label="${o.n}"></button>`).join('')}</div>`;
-    stage.querySelectorAll('.bal').forEach(b => b.onclick = () => {
-      if (busy) return;
-      const o = opts[b.dataset.i];
-      if (o === t) win(b, `對了！這是${t.n}！`);
-      else miss(b, `這是${o.n}喔，再找找${t.n}。`);
-    });
-  }
-
-  function countRound(){
-    const a = ANIMALS[rnd(ANIMALS.length)], n = 1 + rnd(5);
-    let opts = [n];
-    while (opts.length < 3){ const v = 1 + rnd(5); if (!opts.includes(v)) opts.push(v); }
-    opts.sort((x,y) => x-y);
-    prompt = `有幾隻${a.n}？`;
-    stage.innerHTML = `<div class="q">有幾隻${a.n}？</div>
-      <div class="row">${Array.from({length:n},()=>`<span class="cnt">${a.e}</span>`).join('')}</div>
-      <div class="opts">${opts.map(v=>`<button class="num" data-v="${v}"><b>${v}</b><i>${'●'.repeat(v)}</i></button>`).join('')}</div>`;
-    const cs = stage.querySelectorAll('.cnt');
-    const countAloud = done => {
-      busy = true;
-      const tk = token;
-      cs.forEach((c,i) => setTimeout(() => {
-        if (tk !== token) return;
-        cs.forEach(x => x.classList.remove('on'));
-        c.classList.add('on'); say(ZH[i+1]);
-      }, i*900));
-      setTimeout(() => {
-        if (tk !== token) return;
-        cs.forEach(x => x.classList.remove('on'));
-        done();
-      }, n*900 + 200);
-    };
-    stage.querySelectorAll('.num').forEach(b => b.onclick = () => {
-      if (busy) return;
-      const v = +b.dataset.v;
-      if (v === n){
-        countAloud(() => win(b, `${QTY[n]}隻${a.n}！好棒！`));
-      } else {
-        busy = true;
-        miss(b, '我們一起數一數。');
-        const tk = token;
-        setTimeout(() => { if (tk === token) countAloud(() => { busy = false; say(`有幾隻${a.n}呢？`); }); }, 1400);
-      }
-    });
-  }
-
-  function animalRound(){
-    const opts = shuffle(ANIMALS).slice(0,3), t = opts[rnd(3)];
-    prompt = `${t.n}在哪裡？`;
-    stage.innerHTML = `<div class="q">${t.n}在哪裡？</div>
-      <div class="opts">${opts.map((o,i)=>`<button class="card" data-i="${i}" aria-label="${o.n}">${o.e}</button>`).join('')}</div>`;
-    stage.querySelectorAll('.card').forEach(b => b.onclick = () => {
-      if (busy) return;
-      const o = opts[b.dataset.i];
-      if (o === t) win(b, `對了！${t.n}，${t.s}！`);
-      else miss(b, `這是${o.n}，${o.s}。再找找${t.n}。`);
-    });
-  }
-
-  document.getElementById('home').onclick = () => { menu(); say('你想玩什麼呢？'); };
-  document.getElementById('spk').onclick = () => say(prompt);
-  document.addEventListener('gesturestart', e => e.preventDefault());
-  menu();
-})();
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="動物數字樂園" />
+    <meta name="theme-color" content="#9fdcff" />
+    <meta name="description" content="給 3 歲幼兒的數字、顏色、動物互動學習遊戲" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <title>動物數字樂園</title>
+    <style>
+      /* JS 載入前的開機畫面 */
+      html, body { margin: 0; height: 100%; background: #cdeeff; }
+      .boot { height: 100%; display: flex; align-items: center; justify-content: center; }
+      .boot span { width: 22px; height: 22px; margin: 0 8px; border-radius: 50%; background: #ffb36b; animation: boot 1s infinite ease-in-out; }
+      .boot span:nth-child(2) { background: #6bcb77; animation-delay: .15s; }
+      .boot span:nth-child(3) { background: #4d96ff; animation-delay: .3s; }
+      @keyframes boot { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+    </style>
+  </head>
+  <body>
+    <div id="root"><div class="boot"><span></span><span></span><span></span></div></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

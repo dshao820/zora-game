@@ -1,0 +1,164 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Arial Rounded MT Bold', 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
+}
+
+/* 尺寸單位：以 1280×800 為設計基準，1u ≈ 12.8px */
+:root {
+  --u: min(1vw, 1.6vh);
+}
+@media (orientation: portrait) {
+  :root {
+    --u: min(2vw, 1.15vh);
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background: #cdeeff;
+  color: #4a3b3f;
+  font-family: var(--font-sans);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button {
+  cursor: pointer;
+  touch-action: manipulation;
+  font-family: inherit;
+}
+
+/* ---------- 動物 ---------- */
+.aa-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: aa-blink 5s infinite;
+  animation-delay: var(--bd, 0s);
+}
+@keyframes aa-blink {
+  0%, 93%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+.aa-tail {
+  transform-box: view-box;
+  animation: aa-tail 1.8s ease-in-out infinite;
+}
+.aa-wag .aa-tail {
+  animation-duration: 0.25s;
+}
+@keyframes aa-tail {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(12deg); }
+}
+
+/* 深色身體時讓眼睛加上白邊 */
+.aa-dark .aa-blink ellipse {
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+/* ---------- 場景 ---------- */
+.cloud {
+  animation: cloud linear infinite;
+}
+@keyframes cloud {
+  from { transform: translateX(-300px); }
+  to { transform: translateX(1500px); }
+}
+
+.sun-rays {
+  animation: spin 40s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.butterfly {
+  animation: butterfly ease-in-out infinite;
+}
+@keyframes butterfly {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(140px, -70px); }
+  50% { transform: translate(260px, 10px); }
+  75% { transform: translate(120px, 60px); }
+}
+.bfly-wing {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: flap 0.35s ease-in-out infinite alternate;
+}
+@keyframes flap {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0.35); }
+}
+
+/* ---------- 互動 ---------- */
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-18px) rotate(2deg); }
+}
+
+.pulse-soft {
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+
+/* ---------- 獎勵 ---------- */
+.confetti-piece {
+  position: absolute;
+  top: -4vh;
+  width: 14px;
+  height: 20px;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  to { transform: translateY(112vh) rotate(720deg); }
+}
+
+.balloon-rise {
+  transform: translateY(110%);
+  animation: balloon-rise 6s ease-in forwards;
+}
+@keyframes balloon-rise {
+  from { transform: translateY(110%); }
+  to { transform: translateY(-120vh); }
+}
+
+/* 尊重「減少動態效果」設定 */
+@media (prefers-reduced-motion: reduce) {
+  .aa-blink,
+  .aa-tail,
+  .cloud,
+  .sun-rays,
+  .butterfly,
+  .bfly-wing,
+  .float,
+  .pulse-soft {
+    animation: none !important;
+  }
+  .confetti-piece,
+  .balloon-rise {
+    display: none;
+  }
+}
