@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Species } from '../data/animals';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { getAnimal, type AnimalInfo, type Species } from '../data/animals';
 import { COLORS } from '../data/colors';
 import { CELEBRATION, STAR_EARNED } from '../data/phrases';
+import { playAnimalSound } from '../hooks/useAudio';
 import { useGameProgress, type Burst } from '../hooks/useGameProgress';
 import { audio } from '../lib/audio';
 import { speech } from '../lib/speech';
@@ -192,8 +193,66 @@ function Celebration({ stars, onDone }: { stars: number; onDone: () => void }) {
   );
 }
 
+/** 星星帶來一位新的動物朋友：動物跳出來打招呼、叫一聲 */
+function NewFriend({ animal, onDone }: { animal: AnimalInfo; onDone: () => void }) {
+  useEffect(() => {
+    let alive = true;
+    audio.play('cheer');
+    void (async () => {
+      await speech.speak(`${animal.name}來當你的好朋友了！`);
+      if (!alive) return;
+      await playAnimalSound(animal);
+      if (alive) onDone();
+    })();
+    const guard = window.setTimeout(onDone, 12000);
+    return () => {
+      alive = false;
+      window.clearTimeout(guard);
+    };
+  }, [animal, onDone]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-white/60 backdrop-blur-[2px]"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      role="dialog"
+      aria-label={`新朋友：${animal.name}`}
+    >
+      <motion.div
+        className="relative"
+        initial={{ scale: 0, rotate: -25 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: 'spring', stiffness: 180, damping: 11 }}
+      >
+        <div className="sun-rays absolute -inset-[20%] rounded-full bg-[radial-gradient(circle,rgba(255,217,61,0.6),transparent_65%)]" />
+        <AnimalCharacter species={animal.id} size="clamp(180px, 38vmin, 380px)" anim="happy" delay={0.5} wag className="relative" />
+      </motion.div>
+      <motion.span
+        className="flex items-center gap-3 rounded-full bg-white px-7 py-2 text-4xl font-black text-[#4a3b3f] shadow-xl"
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
+        <StarIcon size={44} />
+        {animal.name}
+      </motion.span>
+    </motion.div>
+  );
+}
+
 export function RewardAnimation() {
   const { reward, finishReward, bursts, progress } = useGameProgress();
+  /** 星星動畫播完後，接著介紹這顆星星帶來的新朋友 */
+  const [friendShownFor, setFriendShownFor] = useState<number | null>(null);
+  const friend = reward?.friend ? getAnimal(reward.friend) : null;
+  const showFriend = !!reward && !!friend && friendShownFor === reward.id;
+  const afterStar = useCallback(() => {
+    if (reward && friend) setFriendShownFor(reward.id);
+    else finishReward();
+  }, [reward, friend, finishReward]);
+
   return (
     <>
       <div className="pointer-events-none fixed inset-0 z-[60]">
@@ -202,8 +261,9 @@ export function RewardAnimation() {
         ))}
       </div>
       <AnimatePresence>
-        {reward?.type === 'star' && <StarReward key={reward.id} onDone={finishReward} />}
-        {reward?.type === 'celebrate' && <Celebration key={reward.id} stars={progress.stars} onDone={finishReward} />}
+        {!showFriend && reward?.type === 'star' && <StarReward key={reward.id} onDone={afterStar} />}
+        {!showFriend && reward?.type === 'celebrate' && <Celebration key={reward.id} stars={progress.stars} onDone={afterStar} />}
+        {showFriend && friend && <NewFriend key={`friend-${reward.id}`} animal={friend} onDone={finishReward} />}
       </AnimatePresence>
     </>
   );

@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { AnimalId } from '../data/animals';
+import { friendCount, friendForStar } from '../data/friends';
 import { audio } from '../lib/audio';
 import { speech } from '../lib/speech';
 import { defaultProgress, loadProgress, saveProgress, type LearnKind, type Progress, type Settings } from '../lib/storage';
@@ -11,6 +13,8 @@ export const STARS_PER_CELEBRATION = 5;
 export interface RewardEvent {
   id: number;
   type: 'star' | 'celebrate';
+  /** 這顆星星帶來的新動物朋友 */
+  friend?: AnimalId;
 }
 
 export interface Burst {
@@ -26,6 +30,8 @@ interface ProgressContext {
   /** 完成一題。若得到星星會先播放獎勵動畫，動畫結束後 Promise 才完成 */
   completeTask: (modeId: string) => Promise<void>;
   markLearned: (kind: LearnKind, value: string | number) => void;
+  /** 小朋友打開「動物朋友」看過目前所有朋友 */
+  markFriendsSeen: () => void;
   updateSettings: (patch: Partial<Settings>) => void;
   resetProgress: () => void;
   reward: RewardEvent | null;
@@ -86,7 +92,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       return new Promise<void>((resolve) => {
         resolveReward.current?.();
         resolveReward.current = resolve;
-        setReward({ id: Date.now(), type: rewardType });
+        setReward({ id: Date.now(), type: rewardType, friend: friendForStar(stars)?.id });
       });
     },
     [commit],
@@ -108,6 +114,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     },
     [commit],
   );
+
+  const markFriendsSeen = useCallback(() => {
+    const prev = ref.current;
+    const seen = friendCount(prev.stars);
+    if (prev.friendsSeen !== seen) commit({ ...prev, friendsSeen: seen });
+  }, [commit]);
 
   const updateSettings = useCallback(
     (patch: Partial<Settings>) => {
@@ -135,6 +147,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       settings: progress.settings,
       completeTask,
       markLearned,
+      markFriendsSeen,
       updateSettings,
       resetProgress,
       reward,
@@ -142,7 +155,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       bursts,
       burstFrom,
     }),
-    [progress, completeTask, markLearned, updateSettings, resetProgress, reward, finishReward, bursts, burstFrom],
+    [progress, completeTask, markLearned, markFriendsSeen, updateSettings, resetProgress, reward, finishReward, bursts, burstFrom],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -7,6 +7,7 @@ import AnimalHome, { MODE_ID as ANIMALS_HOME } from './Animals/AnimalHome';
 import LearnAnimals, { MODE_ID as ANIMALS_LEARN } from './Animals/LearnAnimals';
 import SoundQuiz, { MODE_ID as ANIMALS_SOUND } from './Animals/SoundQuiz';
 import Challenges, { MODE_ID as CHALLENGES } from './Challenges/Challenges';
+import MemoryMatch, { MODE_ID as CHALLENGES_MEMORY } from './Challenges/MemoryMatch';
 import DressUp, { MODE_ID as COLORS_DRESS } from './Colors/DressUp';
 import FindColor, { MODE_ID as COLORS_FIND } from './Colors/FindColor';
 import LearnColors, { MODE_ID as COLORS_LEARN } from './Colors/LearnColors';
@@ -145,7 +146,36 @@ export const GAMES: Record<GameId, GameDef> = {
     title: '小小挑戰',
     color: '#fde68a',
     icon: <TrophyIcon size={ICON} />,
-    modes: [{ id: CHALLENGES, label: '小小挑戰', color: '#fde68a', icon: <TrophyIcon size={ICON} />, Component: Challenges }],
+    modes: [
+      {
+        id: CHALLENGES,
+        label: '找找看',
+        color: '#fde68a',
+        icon: (
+          <div className="flex items-end">
+            <AnimalCharacter species="bird" color="#ef5350" size="clamp(82px, 12vmin, 150px)" anim="none" />
+            <AnimalCharacter species="bird" color="#4d96ff" size="clamp(82px, 12vmin, 150px)" anim="none" />
+          </div>
+        ),
+        Component: Challenges,
+      },
+      {
+        id: CHALLENGES_MEMORY,
+        label: '翻翻樂',
+        color: '#c7d2fe',
+        icon: (
+          <div className="flex items-center gap-2">
+            <div className="flex size-[clamp(72px,11vmin,135px)] -rotate-6 items-center justify-center rounded-[22%] border-4 border-white bg-[#bfdbfe] shadow">
+              <QuestionIcon size="60%" />
+            </div>
+            <div className="flex size-[clamp(72px,11vmin,135px)] rotate-6 items-center justify-center rounded-[22%] border-4 border-white bg-white shadow">
+              <AnimalCharacter species="cat" size="85%" anim="none" />
+            </div>
+          </div>
+        ),
+        Component: MemoryMatch,
+      },
+    ],
   },
 };
 

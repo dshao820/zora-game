@@ -2,6 +2,7 @@ import { preloadAnimalSounds } from './hooks/useAudio';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { useState } from 'react';
 import { Caption } from './components/Caption';
+import { Friends } from './components/Friends';
 import { GameHeader, HEADER_HEIGHT } from './components/GameHeader';
 import { Home } from './components/Home';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -16,7 +17,7 @@ import type { GameId } from './games/types';
 import { audio } from './lib/audio';
 import { speech } from './lib/speech';
 
-type Screen = 'loading' | 'home' | GameId;
+type Screen = 'loading' | 'home' | 'friends' | GameId;
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('loading');
@@ -44,21 +45,21 @@ export default function App() {
     setScreen(id);
   };
 
-  const game = screen !== 'loading' && screen !== 'home' ? GAMES[screen] : null;
+  const game = screen !== 'loading' && screen !== 'home' && screen !== 'friends' ? GAMES[screen] : null;
   const ModeComponent = game && mode ? game.modes.find((m) => m.id === mode)?.Component : null;
   const contentKey = `${screen}:${mode ?? ''}`;
 
   return (
     <MotionConfig reducedMotion="user">
       <div className="relative h-full w-full overflow-hidden">
-        <SceneBackground rich={screen !== 'loading' && !game} />
+        <SceneBackground rich={screen === 'home'} />
 
         {screen === 'loading' ? (
           <LoadingScreen onStart={start} />
         ) : (
           <>
             <GameHeader
-              onHome={game ? goHome : undefined}
+              onHome={screen !== 'home' ? goHome : undefined}
               onBack={game && mode && game.modes.length > 1 ? () => setMode(null) : undefined}
             />
             <main className="absolute inset-x-0 bottom-0 z-10" style={{ top: HEADER_HEIGHT, paddingBottom: 'env(safe-area-inset-bottom)' }}>
@@ -71,7 +72,8 @@ export default function App() {
                   exit={{ opacity: 0, scale: 1.03 }}
                   transition={{ duration: 0.25 }}
                 >
-                  {screen === 'home' && <Home greeting={greeting} onOpen={openGame} />}
+                  {screen === 'home' && <Home greeting={greeting} onOpen={openGame} onFriends={() => setScreen('friends')} />}
+                  {screen === 'friends' && <Friends />}
                   {game && !ModeComponent && <ModePicker game={game} onPick={setMode} />}
                   {ModeComponent && <ModeComponent />}
                 </motion.div>

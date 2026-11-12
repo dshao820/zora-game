@@ -1,16 +1,16 @@
 import { motion } from 'motion/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimalCharacter } from '../../components/AnimalCharacter';
 import { CARD_BTN, GameButton } from '../../components/GameButton';
 import { EarIcon } from '../../components/icons';
-import { ANIMALS, type AnimalId } from '../../data/animals';
+import { ANIMALS, type AnimalId, type AnimalInfo } from '../../data/animals';
 import { playAnimalSound } from '../../hooks/useAudio';
 import { useFeedback, useShake } from '../../hooks/useFeedback';
 import { useLevel } from '../../hooks/useLevel';
 import { useReplay } from '../../hooks/useReplay';
 import { useRound } from '../../hooks/useRound';
 import { audio } from '../../lib/audio';
-import { pick, sample } from '../../lib/random';
+import { createDeck, sample, shuffle } from '../../lib/random';
 import { u } from '../../lib/ui';
 
 export const MODE_ID = 'animals-sound';
@@ -23,17 +23,23 @@ export default function SoundQuiz() {
   const { round, locked, setLocked, next, isCurrent } = useRound();
   const shaker = useShake();
   const [jump, setJump] = useState<AnimalId | null>(null);
+  const [draw] = useState(createDeck<AnimalInfo>);
+  /** 每次出題或作答就加一，讓還在進行中的「出題語音」知道自己已經過時 */
+  const turn = useRef(0);
 
   const q = useMemo(() => {
     let pool = animals.filter((a) => a.hasCall);
     if (pool.length < 3) pool = ANIMALS.filter((a) => a.hasCall).slice(0, 3);
-    const options = sample(pool, 3);
-    return { options, target: pick(options) };
+    const target = draw(pool);
+    const options = shuffle([target, ...sample(pool.filter((a) => a.id !== target.id), 2)]);
+    return { options, target };
   }, [round, animals]);
 
   const ask = async () => {
+    const t = ++turn.current;
     await playAnimalSound(q.target);
-    await say(QUESTION);
+    // 叫聲還沒播完小朋友就作答了：不要再念題目，以免蓋掉答對／答錯的回饋
+    if (turn.current === t) await say(QUESTION);
   };
 
   useEffect(() => {
@@ -45,6 +51,7 @@ export default function SoundQuiz() {
 
   const choose = async (id: AnimalId) => {
     if (locked) return;
+    turn.current += 1;
     const r = round;
     const a = q.options.find((o) => o.id === id)!;
     if (id === q.target.id) {

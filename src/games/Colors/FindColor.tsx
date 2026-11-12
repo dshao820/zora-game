@@ -1,12 +1,13 @@
 import { motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
 import { Balloon } from '../../components/Balloon';
+import type { GameColor } from '../../data/colors';
 import { useFeedback, useShake } from '../../hooks/useFeedback';
 import { useLevel } from '../../hooks/useLevel';
 import { useReplay } from '../../hooks/useReplay';
 import { useRound } from '../../hooks/useRound';
 import { audio } from '../../lib/audio';
-import { pick, sample } from '../../lib/random';
+import { createDeck, sample, shuffle } from '../../lib/random';
 import { u } from '../../lib/ui';
 import { ColorLabel } from './ColorLabel';
 
@@ -19,10 +20,12 @@ export default function FindColor() {
   const { round, locked, setLocked, next, isCurrent } = useRound();
   const shaker = useShake();
   const [flying, setFlying] = useState<string | null>(null);
+  const [draw] = useState(createDeck<GameColor>);
 
   const q = useMemo(() => {
-    const options = sample(colors, 3);
-    return { options, target: pick(options) };
+    const target = draw(colors);
+    const options = shuffle([target, ...sample(colors.filter((c) => c.id !== target.id), 2)]);
+    return { options, target };
   }, [round, colors]);
 
   const prompt = `請找到${q.target.name}的氣球！`;

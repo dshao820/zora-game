@@ -9,9 +9,11 @@
 | 🔢 數字樂園 | 認識數字、數數看、數字配對（可拖曳，也可點擊配對） |
 | 🎨 顏色樂園 | 認識顏色、找顏色氣球、幫動物穿衣服 |
 | 🐼 動物樂園 | 認識動物、聽聲音找動物、動物找家 |
-| 🌟 小小挑戰 | 數量＋顏色＋動物綜合題 |
+| 🌟 小小挑戰 | 找找看（數量＋顏色＋動物綜合題）、翻翻樂（翻牌配對，依難度 3／4／6 組） |
+| 🐾 我的動物朋友 | 星星換來的收藏：每得到一顆星星就有一隻新動物來當朋友，點一下會打招呼、叫一聲 |
 
 - 每完成 5 題得到一顆星星，每 5 顆星星出現慶祝畫面
+- 每顆星星帶來一位新的動物朋友（共 18 位，一開始先送一位），首頁下方的「我的動物朋友」可以看收藏
 - 沒有倒數、不扣分、可以無限重試
 - 上方固定有：回首頁、重播語音、聲音開關
 - **家長設定**：首頁左下角的小齒輪「按住 3 秒」開啟，可調整背景音樂／語音／音效、難度（初級／中級／進階）、查看學習進度、重置紀錄
@@ -37,13 +39,13 @@ src/
 ├── components/   共用 UI：AnimalCharacter、GameButton、GameHeader、AudioButton、RewardAnimation…
 ├── games/        Numbers / Colors / Animals / Challenges，每個模式一個元件；registry.tsx 註冊
 ├── hooks/        useSpeech、useAudio、useGameProgress、useReplay、useLevel、useRound、useFeedback
-├── data/         題目資料：animals、colors、numbers、difficulty、phrases
+├── data/         題目資料：animals、colors、numbers、difficulty、phrases、friends（動物朋友加入順序）
 ├── lib/          speech（語音引擎）、audio（音效合成）、storage、random、ui
 └── App.tsx
 ```
 
 - 新增模式：在 `src/games/<遊戲>/` 新增元件並匯出 `MODE_ID`，再到 `src/games/registry.tsx` 加一筆
-- 新增動物：在 `src/data/animals.ts` 加資料，並在 `src/components/AnimalArt.tsx` 畫出造型
+- 新增動物：在 `src/data/animals.ts` 加資料，並在 `src/components/AnimalArt.tsx` 畫出造型；新動物會自動排到「動物朋友」的最後（要調整順序改 `src/data/friends.ts`）
 - 動物叫聲是真實錄音，放在 `public/sounds/`（來源與授權見 `public/sounds/CREDITS.md`）；在 `animals.ts` 用 `soundUrl` 指定，沒有或播放失敗時改用語音念出狀聲詞
 
 ## 語音

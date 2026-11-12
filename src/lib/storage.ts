@@ -20,6 +20,8 @@ export interface Progress {
   totalTasks: number;
   modeCompletions: Record<string, number>;
   learned: { numbers: number[]; colors: string[]; animals: string[] };
+  /** 小朋友已經在「動物朋友」看過幾位朋友（用來顯示「有新朋友」提示） */
+  friendsSeen: number;
   settings: Settings;
 }
 
@@ -40,8 +42,12 @@ export const defaultProgress = (): Progress => ({
   totalTasks: 0,
   modeCompletions: {},
   learned: { numbers: [], colors: [], animals: [] },
+  friendsSeen: 0,
   settings: defaultSettings(),
 });
+
+const count = (v: unknown) => Math.max(0, Math.floor(Number(v) || 0));
+const list = <T,>(v: T[] | undefined): T[] => (Array.isArray(v) ? v : []);
 
 export function loadProgress(): Progress {
   const d = defaultProgress();
@@ -51,12 +57,19 @@ export function loadProgress(): Progress {
     const data = JSON.parse(raw) as Partial<Progress>;
     const settings = { ...d.settings, ...data.settings };
     if (!(settings.difficulty in DIFFICULTIES)) settings.difficulty = 'beginner';
+    const learned = data.learned ?? d.learned;
     return {
-      stars: Number(data.stars) || 0,
-      taskProgress: Number(data.taskProgress) || 0,
-      totalTasks: Number(data.totalTasks) || 0,
+      stars: count(data.stars),
+      // 資料損壞時不能超過一顆星星需要的題數，否則進度點會壞掉
+      taskProgress: Math.min(count(data.taskProgress), 4),
+      totalTasks: count(data.totalTasks),
       modeCompletions: { ...data.modeCompletions },
-      learned: { ...d.learned, ...data.learned },
+      learned: {
+        numbers: list(learned.numbers),
+        colors: list(learned.colors),
+        animals: list(learned.animals),
+      },
+      friendsSeen: count(data.friendsSeen),
       settings,
     };
   } catch {

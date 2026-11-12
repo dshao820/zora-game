@@ -3,12 +3,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimalCharacter } from '../../components/AnimalCharacter';
 import { CARD_BTN, GameButton } from '../../components/GameButton';
 import { ShirtIcon } from '../../components/icons';
+import type { AnimalInfo } from '../../data/animals';
+import type { GameColor } from '../../data/colors';
 import { useFeedback, useShake } from '../../hooks/useFeedback';
 import { useLevel } from '../../hooks/useLevel';
 import { useReplay } from '../../hooks/useReplay';
 import { useRound } from '../../hooks/useRound';
 import { audio } from '../../lib/audio';
-import { pick, sample, shuffle } from '../../lib/random';
+import { createDeck, sample, shuffle } from '../../lib/random';
 import { u } from '../../lib/ui';
 import { ColorLabel } from './ColorLabel';
 
@@ -24,13 +26,15 @@ export default function DressUp() {
   const animalRef = useRef<HTMLDivElement>(null);
   const [shirt, setShirt] = useState(WHITE);
   const [dance, setDance] = useState(0);
+  const [drawColor] = useState(createDeck<GameColor>);
+  const [drawAnimal] = useState(createDeck<AnimalInfo>);
 
   const q = useMemo(() => {
     // 衣服一開始是白色，所以白色不當選項
     const pool = colors.filter((c) => c.id !== 'white');
-    const target = pick(pool);
+    const target = drawColor(pool);
     const options = shuffle([target, ...sample(pool.filter((c) => c.id !== target.id), 2)]);
-    return { animal: pick(animals), target, options };
+    return { animal: drawAnimal(animals), target, options };
   }, [round, colors, animals]);
 
   const prompt = `幫${q.animal.name}穿上${q.target.name}衣服！`;

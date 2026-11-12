@@ -10,7 +10,7 @@ import { useLevel } from '../../hooks/useLevel';
 import { useReplay } from '../../hooks/useReplay';
 import { useRound } from '../../hooks/useRound';
 import { audio } from '../../lib/audio';
-import { pick, sample } from '../../lib/random';
+import { createDeck, pick, sample } from '../../lib/random';
 import { crowdSize, u } from '../../lib/ui';
 
 export const MODE_ID = 'numbers-count';
@@ -25,9 +25,10 @@ export default function CountQuiz() {
   const [dance, setDance] = useState(0);
   /** 一起數的時候，目前數到第幾隻 */
   const [pointer, setPointer] = useState(-1);
+  const [drawNumber] = useState(createDeck<number>);
 
   const q = useMemo(() => {
-    const n = pick(numbers);
+    const n = drawNumber(numbers);
     const animal = pick(animals);
     const options = [n, ...sample(numbers.filter((x) => x !== n), 2)].sort((a, b) => a - b);
     return { n, animal, options };

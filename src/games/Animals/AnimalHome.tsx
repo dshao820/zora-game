@@ -15,7 +15,7 @@ import { u } from '../../lib/ui';
 export const MODE_ID = 'animals-home';
 const ALL_HABITATS = Object.keys(HABITATS) as HabitatId[];
 
-/** 模式 C：動物找朋友 —— 幫動物找到牠的家，答對後動物走進去 */
+/** 模式 C：動物找家 —— 幫動物找到牠的家，答對後動物走進去 */
 export default function AnimalHome() {
   const { animals } = useLevel();
   const { say, success, retry, markLearned } = useFeedback();
